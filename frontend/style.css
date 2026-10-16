@@ -46,6 +46,29 @@ button {
   cursor: pointer;
 }
 button:disabled { opacity: 0.6; cursor: default; }
+button.secondary { background: var(--surface); color: var(--text); border-color: var(--border); }
+
+.login { display: flex; justify-content: center; padding: 48px 16px; }
+.login form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 360px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.login h2 { margin: 0 0 4px; }
+.login label { color: var(--muted); }
+.login input {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.login .status { margin: 0; }
 
 .tabs {
   display: flex;
@@ -115,3 +138,23 @@ tbody tr:last-child td { border-bottom: none; }
 
 .sg-block { margin-bottom: 16px; }
 .sg-block p { margin: 0; padding: 8px 0; }
+.allowed { color: var(--ok); font-weight: 600; }
+
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 16px; align-items: start; }
+@media (max-width: 480px) { .split { grid-template-columns: 1fr; } }
+.row-actions { display: flex; gap: 6px; }
+.row-actions button { padding: 3px 10px; font-size: 13px; }
+button.danger { background: #b42318; border-color: #b42318; }
+td.wrap { white-space: normal; min-width: 160px; }
+
+dialog { border: 1px solid var(--border); border-radius: 8px; padding: 20px; max-width: 420px; width: calc(100% - 32px); }
+dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
+dialog h2 { margin-top: 0; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+.badge.status-ACCEPTED { background: #dafbe1; color: var(--ok); }
+.badge.status-FAILED { background: var(--error-bg); color: var(--error-text); }
+.badge.status-REQUESTED, .badge.status-UNKNOWN { background: #fff8c5; color: var(--warn); }
+.status.success { background: #dafbe1; color: var(--ok); }
+.status.warning { background: #fff8c5; color: var(--warn); }

@@ -9,17 +9,31 @@
 <body>
   <header class="topbar">
     <h1>Cloud Control</h1>
-    <div class="topbar-actions">
+    <div class="topbar-actions" id="session-actions" hidden>
       <span class="muted">마지막 조회: <span id="last-fetched">-</span></span>
       <button type="button" id="refresh-btn">조회</button>
+      <button type="button" id="logout-btn" class="secondary">로그아웃</button>
     </div>
   </header>
 
+  <section id="login-view" class="login">
+    <!-- name 속성이 없고 submit은 JS가 막으므로 토큰이 URL로 전송되지 않는다. -->
+    <form id="login-form" autocomplete="off">
+      <h2>앱 토큰 입력</h2>
+      <label for="token-input">ADMIN_API_TOKEN</label>
+      <input type="password" id="token-input" autocomplete="off" spellcheck="false" required>
+      <button type="submit" id="connect-btn">연결</button>
+      <div id="login-status" class="status hidden"></div>
+    </form>
+  </section>
+
+  <div id="app-view" hidden>
   <nav class="tabs" role="tablist">
     <button type="button" role="tab" class="tab active" data-tab="dashboard">대시보드</button>
     <button type="button" role="tab" class="tab" data-tab="ec2">EC2</button>
     <button type="button" role="tab" class="tab" data-tab="s3">S3</button>
     <button type="button" role="tab" class="tab" data-tab="sg">보안 그룹</button>
+    <button type="button" role="tab" class="tab" data-tab="control">제어</button>
   </nav>
 
   <main>
@@ -46,7 +60,7 @@
       <div class="table-wrap" id="ec2-table-wrap" hidden>
         <table>
           <thead>
-            <tr><th>이름</th><th>인스턴스 ID</th><th>상태</th><th>유형</th><th>프라이빗 IP</th><th>퍼블릭 IP</th></tr>
+            <tr><th>이름</th><th>인스턴스 ID</th><th>상태</th><th>유형</th><th>프라이빗 IP</th><th>퍼블릭 IP</th><th>제어</th></tr>
           </thead>
           <tbody id="ec2-body"></tbody>
         </table>
@@ -69,7 +83,55 @@
       <div id="sg-status" class="status"></div>
       <div id="sg-list"></div>
     </section>
+    <section id="panel-control" class="panel" hidden>
+      <div class="panel-head">
+        <h2>EC2 제어</h2>
+        <button type="button" id="control-refresh-btn" class="secondary">새로고침</button>
+      </div>
+      <p class="muted">상태는 자동으로 갱신되지 않습니다. 작업 후 새로고침으로 확인하세요.</p>
+      <div id="control-result" class="status hidden"></div>
+      <div class="split">
+        <div>
+          <h3>현재 상태</h3>
+          <div id="control-status" class="status"></div>
+          <div class="table-wrap" id="control-table-wrap" hidden>
+            <table>
+              <thead><tr><th>이름</th><th>인스턴스 ID</th><th>상태</th><th>작업</th></tr></thead>
+              <tbody id="control-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h3>제어 이력 (최신 50건)</h3>
+          <div id="actions-status" class="status"></div>
+          <div class="table-wrap" id="actions-table-wrap" hidden>
+            <table>
+              <thead><tr><th>시각</th><th>대상</th><th>작업</th><th>상태</th><th>메시지</th></tr></thead>
+              <tbody id="actions-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
+  </div>
+
+  <dialog id="confirm-dialog">
+    <form method="dialog" id="confirm-form">
+      <h2>EC2 작업 확인</h2>
+      <dl class="info">
+        <dt>계정</dt><dd id="confirm-account"></dd>
+        <dt>리전</dt><dd id="confirm-region"></dd>
+        <dt>이름</dt><dd id="confirm-name"></dd>
+        <dt>인스턴스 ID</dt><dd id="confirm-id" class="mono"></dd>
+        <dt>작업</dt><dd id="confirm-action"></dd>
+      </dl>
+      <div class="dialog-actions">
+        <button type="button" id="confirm-cancel" class="secondary">취소</button>
+        <button type="button" id="confirm-ok">승인</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="app.js"></script>
 </body>

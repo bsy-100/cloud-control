@@ -25,6 +25,12 @@ BOTO_CONFIG = Config(
     read_timeout=10,
     retries={"max_attempts": 2, "mode": "standard"},
 )
+# 변경(시작·중지) 전용: 자동 재시도 없이 한 번만 보낸다.
+CONTROL_CONFIG = Config(
+    connect_timeout=3,
+    read_timeout=10,
+    retries={"total_max_attempts": 1, "mode": "standard"},
+)
 
 LOGIN_ERRORS = (
     LoginError,
@@ -78,6 +84,10 @@ def to_service_error(exc: Exception) -> AwsServiceError:
             return AwsServiceError(403, "AWS_ACCESS_DENIED", "이 AWS 작업을 수행할 권한이 없습니다.")
         if code in LOGIN_REQUIRED_CODES:
             return login_required()
+        if code.startswith("InvalidInstanceID"):
+            return AwsServiceError(404, "INSTANCE_NOT_FOUND", "EC2 인스턴스를 찾을 수 없습니다.")
+        if code == "IncorrectInstanceState":
+            return AwsServiceError(409, "INVALID_INSTANCE_STATE", "현재 인스턴스 상태에서는 이 작업을 할 수 없습니다.")
         return AwsServiceError(502, "AWS_REQUEST_FAILED", f"AWS 요청이 실패했습니다. (오류 코드: {code or 'Unknown'})")
     if isinstance(exc, BotoCoreError):
         return AwsServiceError(502, "AWS_REQUEST_FAILED", "AWS 요청 처리 중 오류가 발생했습니다.")
@@ -164,3 +174,24 @@ def list_security_groups(session: boto3.Session) -> list[dict]:
         }
         for g in groups
     ]
+
+
+def get_instance_state(session: boto3.Session, instance_id: str) -> str | None:
+    """제어 직전 최신 상태 확인용 단건 조회."""
+    ec2 = session.client("ec2", config=BOTO_CONFIG)
+    response = call_aws(ec2.describe_instances, InstanceIds=[instance_id])
+    for reservation in response.get("Reservations", []):
+        for inst in reservation.get("Instances", []):
+            if inst.get("InstanceId") == instance_id:
+                return inst.get("State", {}).get("Name")
+    return None
+
+
+def send_instance_action(session: boto3.Session, instance_id: str, action: str) -> dict:
+    """시작·중지 변경 호출. 예외는 호출한 쪽에서 접수/거절/불확실로 분류하므로 변환하지 않는다."""
+    ec2 = session.client("ec2", config=CONTROL_CONFIG)
+    if action == "start":
+        return ec2.start_instances(InstanceIds=[instance_id])
+    if action == "stop":
+        return ec2.stop_instances(InstanceIds=[instance_id])
+    raise ValueError("지원하지 않는 작업입니다.")
