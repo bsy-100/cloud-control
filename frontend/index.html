@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cloud Control</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <h1>Cloud Control</h1>
+    <div class="topbar-actions">
+      <span class="muted">마지막 조회: <span id="last-fetched">-</span></span>
+      <button type="button" id="refresh-btn">조회</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button type="button" role="tab" class="tab active" data-tab="dashboard">대시보드</button>
+    <button type="button" role="tab" class="tab" data-tab="ec2">EC2</button>
+    <button type="button" role="tab" class="tab" data-tab="s3">S3</button>
+    <button type="button" role="tab" class="tab" data-tab="sg">보안 그룹</button>
+  </nav>
+
+  <main>
+    <section id="panel-dashboard" class="panel">
+      <h2>계정</h2>
+      <div id="context-status" class="status"></div>
+      <dl id="context-info" class="info" hidden>
+        <dt>계정 ID</dt><dd id="ctx-account"></dd>
+        <dt>호출자 ARN</dt><dd id="ctx-arn"></dd>
+        <dt>리전</dt><dd id="ctx-region"></dd>
+      </dl>
+
+      <h2>리소스 수</h2>
+      <div class="cards">
+        <div class="card"><div class="card-label">EC2 인스턴스</div><div class="card-value" id="count-ec2">-</div></div>
+        <div class="card"><div class="card-label">S3 버킷</div><div class="card-value" id="count-s3">-</div></div>
+        <div class="card"><div class="card-label">보안 그룹</div><div class="card-value" id="count-sg">-</div></div>
+      </div>
+    </section>
+
+    <section id="panel-ec2" class="panel" hidden>
+      <h2>EC2 인스턴스</h2>
+      <div id="ec2-status" class="status"></div>
+      <div class="table-wrap" id="ec2-table-wrap" hidden>
+        <table>
+          <thead>
+            <tr><th>이름</th><th>인스턴스 ID</th><th>상태</th><th>유형</th><th>프라이빗 IP</th><th>퍼블릭 IP</th></tr>
+          </thead>
+          <tbody id="ec2-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="panel-s3" class="panel" hidden>
+      <h2>S3 버킷</h2>
+      <div id="s3-status" class="status"></div>
+      <div class="table-wrap" id="s3-table-wrap" hidden>
+        <table>
+          <thead><tr><th>버킷 이름</th></tr></thead>
+          <tbody id="s3-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="panel-sg" class="panel" hidden>
+      <h2>보안 그룹 (인바운드 규칙)</h2>
+      <div id="sg-status" class="status"></div>
+      <div id="sg-list"></div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
